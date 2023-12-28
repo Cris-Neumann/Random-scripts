@@ -1,0 +1,4 @@
+Logs.
+
+01-03-2023, 21:40:21: Actualizacion BBDD PostgreSQL con exito, 3 registros actualizados y 2 registros insertados.
+01-03-2023, 21:40:22: Actualizacion BBDD PostgreSQL con exito, 0 registros actualizados y 0 registros insertados.
