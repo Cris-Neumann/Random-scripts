@@ -1,0 +1,83 @@
+# La 1era macro muestra el metodo para importar desde un archivo Excel a una BBDD SQL Server.
+# La 2da macro muestra el metodo para exportar desde una BBDD SQL Server a un archivo Excel.
+  
+Sub Inserta_data_en_SQL_Server()
+Dim con As ADODB.Connection, k As Double, i As Double
+Dim com As New ADODB.Command
+Dim rs As ADODB.Recordset ' Este se usa solo para lectura
+Dim nombre As String, apellido As String, rut As String
+    Set con = Nothing
+    Set rs = Nothing
+    Set con = New ADODB.Connection
+    Set rs = New ADODB.Recordset
+    con.Open "Provider=SQLOLEDB;Initial Catalog=BD_PRUEBA" & _                 ' "Catalog"  es la BBDD donde se importa la data
+    ";Data Source=CRISTIAN-PC\SQLEXPRESS;integrated security=SSPI;"            ' "Data Source" es la máquina/servidor donde se obtiene la data
+        If con.State = 1 Then
+            com.ActiveConnection = con
+            com.CommandType = adCmdText
+        Else
+            MsgBox "No se pudo conectar a la Base de Datos"
+            End
+        End If
+    ActiveSheet.Columns("A:C").Find("*", _
+    searchorder:=xlByRows, SearchDirection:=xlPrevious).Select
+    k = ActiveCell.Row
+    Range("a1").Select                                                         ' El rango de donde parte la carga y qué columnas recorre depende de cada set de datos
+    For i = 2 To k
+        nombre = Cells(i, 1)
+        apellido = Cells(i, 2)
+        rut = Cells(i, 3)
+        nombre = CStr(nombre)
+        apellido = CStr(apellido)
+        com.CommandText = "INSERT INTO TB_PRUEBA (NOMBRE, APELLIDO, RUT)" & _  ' Acá se escoje en qué tabla se importará la data
+        "values ('" & nombre & "', '" & apellido & "', '" & rut & "')"
+        ' Ejecución de la Query SQL anterior
+        com.Execute
+    Next i
+    ' Cierre de la conexión
+    con.Close
+    MsgBox "Todo OK"
+End Sub
+
+Sub Conección_a_SQL_Server()
+Dim cnn As ADODB.Connection
+Dim rst As ADODB.Recordset
+Dim tField As ADODB.Field
+    ' Se resetean valores por si estaban abiertos antes
+    Set cnn = Nothing
+    Set rst = Nothing
+    ' Crear los objetos
+    Set cnn = New ADODB.Connection
+    Set rst = New ADODB.Recordset
+    ' abrir la base usando las credenciales de Windows
+    cnn.Open "Provider=SQLOLEDB;Initial Catalog=escuela" & _
+    ";Data Source=CRISTIAN-PC\SQLEXPRESS;integrated security=SSPI;"
+    ' abrir el recordset indicando la tabla a la que queremos acceder
+    rst.Open "SELECT * FROM materia", cnn, adOpenDynamic, adLockOptimistic
+Dim fldCount As Integer
+Dim recCount As Long
+Dim i As Long
+Dim j As Long
+    ' Traer las cabeceras de los campos de la tabla en SQL Server hacia Excel
+    i = 1
+    Range("d10").Select
+    fldCount = rst.Fields.Count
+    For i = 1 To fldCount
+        Cells(10, i).Value = rst.Fields(i - 1).Name
+    Next
+    ' Trae todo el contenido de la tabla en SQL Server hacia Excel
+    i = 1
+    j = 11
+    fldCount = rst.Fields.Count
+    Do While Not rst.EOF
+        For i = 1 To fldCount
+            Cells(j, i).Value = rst.Fields(i - 1).Value
+        Next
+        j = j + 1
+        rst.MoveNext
+    Loop
+    Range("e12").Select
+    ' Cerrar el recordset y la conexión
+    rst.Close
+    cnn.Close
+End Sub
