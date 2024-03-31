@@ -30,5 +30,5 @@ def agregar_numeros(tablero):
                         tablero_completo[nueva_fila][nueva_columna] += 1
     return tablero_completo
 
-lista_final = colocar_numeros(tablero)
+lista_final = agregar_numeros(tablero)
 print(lista_final)
